@@ -9,6 +9,8 @@
 // output   = "../src/generated/prisma"
 //}
 
+// prisma/schema.prisma
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -18,31 +20,78 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Organization {
+// ----------------------------
+// Actor (User or Organization)
+// ----------------------------
+model Actor {
   id        String    @id @default(uuid())
+  type      ActorType
+  email     String    @unique
+  password  String // hashed
   name      String
-  type      String // 'university' | 'industry'
+  bio       String?
   createdAt DateTime  @default(now())
-  projects  Project[]
-  users     User[]
+
+  // Relations
+  projects      Project[]              @relation("ProjectOwner")
+  requests      ParticipationRequest[]
+  partnershipsA Partnership[]          @relation("PartnershipA")
+  partnershipsB Partnership[]          @relation("PartnershipB")
 }
 
-model User {
-  id             String        @id @default(uuid())
-  name           String
-  email          String        @unique
-  organization   Organization? @relation(fields: [organizationId], references: [id])
-  organizationId String?
-  createdAt      DateTime      @default(now())
-}
-
+// ----------------------------
+// Projects
+// ----------------------------
 model Project {
-  id          String       @id @default(uuid())
+  id          String   @id @default(uuid())
   title       String
-  description String
-  domains     String[]     @default([])
-  stage       String?
-  ownerId     String
-  owner       Organization @relation(fields: [ownerId], references: [id])
-  createdAt   DateTime     @default(now())
+  description String?
+  createdAt   DateTime @default(now())
+
+  // Relations
+  owner    Actor                  @relation("ProjectOwner", fields: [ownerId], references: [id])
+  ownerId  String
+  requests ParticipationRequest[]
+}
+
+// ----------------------------
+// Participation Requests
+// ----------------------------
+model ParticipationRequest {
+  id        String        @id @default(uuid())
+  status    RequestStatus @default(PENDING)
+  createdAt DateTime      @default(now())
+
+  // Relations
+  actor     Actor   @relation(fields: [actorId], references: [id])
+  actorId   String
+  project   Project @relation(fields: [projectId], references: [id])
+  projectId String
+}
+
+// ----------------------------
+// Partnerships
+// ----------------------------
+model Partnership {
+  id String @id @default(uuid())
+
+  // Self relation (Actor ↔ Actor)
+  a   Actor  @relation("PartnershipA", fields: [aId], references: [id])
+  aId String
+  b   Actor  @relation("PartnershipB", fields: [bId], references: [id])
+  bId String
+}
+
+// ----------------------------
+// Enums
+// ----------------------------
+enum ActorType {
+  INDIVIDUAL
+  ORGANIZATION
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }

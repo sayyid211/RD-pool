@@ -2,19 +2,28 @@
 
 RD-Pool is a web application that connects university and industry R&D organizations, enabling them to collaborate on research, funding, and project implementation across various domains. The platform supports partnerships between universities, industry players, and cross-sector collaborations.
 
-## Features
+## ✨ Features (MVP)
+- **Individual Users**:  
+  - Sign up / Log in  
+  - Create and edit profile  
+  - Request to join organization projects  
+  - Partner with other individual researchers  
 
-- **Project Matching:** Intelligent keyword-based scoring to match organizations and projects.
-- **Project Management:** Create and manage research projects.
-- **Partnerships:** Facilitate connections between universities and industry R&D teams.
+- **Organizations**:  
+  - Sign up / Log in  
+  - Publish research projects  
+  - Accept or reject participant requests  
 
-## Tech Stack
+---
 
-- **Frontend:** Next.js (React 19), Tailwind CSS
-- **Backend:** Next.js API routes, Prisma ORM
-- **Database:** PostgreSQL (via Docker)
-- **ORM:** Prisma
-- **Other:** TypeScript, ESLint
+## 🛠️ Tech Stack
+- [Next.js](https://nextjs.org/) – React framework for the frontend & API routes  
+- [Prisma](https://www.prisma.io/) – Type-safe ORM for the database  
+- [PostgreSQL](https://www.postgresql.org/) – Relational database  
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) – For containerized PostgreSQL  
+- [TypeScript](https://www.typescriptlang.org/) – Strict typing for better DX  
+
+---
 
 ## Getting Started
 
@@ -65,12 +74,15 @@ RD-Pool is a web application that connects university and industry R&D organizat
 
 ### Project Structure
 
-- `src/app/page.tsx` – Main landing page
-- `src/app/projectForm.tsx` – Project creation and match display form
-- `src/app/api/projects/route.ts` – API GET/POST for projects
-- `src/app/match.ts` – Keyword scoring match function
-- `prisma/schema.prisma` – Database schema
-
+rd-pool/
+ ┣ prisma/           # Prisma schema & migrations
+ ┣ src/
+ ┃ ┣ pages/          # Next.js pages (frontend + API routes)
+ ┃ ┣ components/     # UI components
+ ┃ ┗ lib/            # Helpers (e.g., db connection)
+ ┣ .env              # Environment variables
+ ┣ package.json
+ ┗ README.md
 ## Learn More
 
 - [Next.js Documentation](https://nextjs.org/docs)
