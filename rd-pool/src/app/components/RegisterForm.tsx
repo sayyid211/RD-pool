@@ -3,43 +3,46 @@
 import { useState } from "react";
 
 export default function RegisterForm() {
-  const [form, setForm] = useState({ email: "", password: "", name: "" });
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Register form submitted:", form);
-    // Later: call API route (POST /api/auth/register)
-    fetch("/api/auth/register", { method: "POST", body: JSON.stringify() })
+
+    const res = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password, name }),
+    });
+
+    const data = await res.json();
+    console.log("Register response:", data);
+    alert(data.message || "Registration attempt finished.");
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <input
-        name="name"
-        placeholder="Full Name"
-        onChange={handleChange}
+        type="text"
+        placeholder="Name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
         className="w-full p-2 border rounded"
-        required
       />
       <input
-        name="email"
         type="email"
         placeholder="Email"
-        onChange={handleChange}
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
         className="w-full p-2 border rounded"
-        required
       />
       <input
-        name="password"
         type="password"
         placeholder="Password"
-        onChange={handleChange}
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
         className="w-full p-2 border rounded"
-        required
       />
       <button
         type="submit"

@@ -1,32 +1,35 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma"; // later
-// import bcrypt from "bcryptjs";
-// import jwt from "jsonwebtoken";
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
+
+const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const { email, password } = body;
+    const { email, password } = await req.json();
 
     if (!email || !password) {
-      return NextResponse.json({ error: "Email and password are required" }, { status: 400 });
+      return NextResponse.json({ error: "Missing email or password" }, { status: 400 });
     }
 
-    // Example stub: later we’ll check DB + bcrypt
-    // const user = await prisma.user.findUnique({ where: { email } });
-    // if (!user || !(await bcrypt.compare(password, user.password))) {
-    //   return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
-    // }
-
-    // Generate JWT/session (stubbed for now)
-    // const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, { expiresIn: "1h" });
-
-    return NextResponse.json({
-      message: "Login successful (stubbed, DB not yet connected).",
-      token: "fake-jwt-token",
+    // Find actor
+    const actor = await prisma.actor.findUnique({
+      where: { email },
     });
-  } catch (err) {
-    console.error(err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+
+    if (!actor) {
+      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+    }
+
+    // Compare password
+    const isValid = await bcrypt.compare(password, actor.password);
+
+    if (!isValid) {
+      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+    }
+
+    return NextResponse.json({ message: "Login successful", actor }, { status: 200 });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

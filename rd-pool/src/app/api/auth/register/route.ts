@@ -1,30 +1,41 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma"; // we'll set this up later
-// import bcrypt from "bcryptjs";
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
+
+const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const { email, password, name } = body;
+    const { name, email, password, type } = await req.json();
 
-    if (!email || !password) {
-      return NextResponse.json({ error: "Email and password are required" }, { status: 400 });
+    if (!name || !email || !password || !type) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // 🔒 hash password before saving
-    // const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Save to DB (stub for now)
-    // const user = await prisma.user.create({
-    //   data: { email, name, password: hashedPassword },
-    // });
-
-    return NextResponse.json({
-      message: "User registered successfully (stubbed, DB not yet connected).",
-      user: { email, name },
+    // Check if user already exists
+    const existing = await prisma.actor.findUnique({
+      where: { email },
     });
-  } catch (err) {
-    console.error(err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+
+    if (existing) {
+      return NextResponse.json({ error: "User already exists" }, { status: 400 });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create new actor (user/org)
+    const actor = await prisma.actor.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+        type, // should be "INDIVIDUAL" or "ORGANIZATION"
+      },
+    });
+
+    return NextResponse.json({ message: "User registered successfully", actor }, { status: 201 });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
