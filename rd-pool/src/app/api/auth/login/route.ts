@@ -12,23 +12,20 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing email or password" }, { status: 400 });
     }
 
-    // Find actor
-    const actor = await prisma.actor.findUnique({
-      where: { email },
-    });
-
+    const actor = await prisma.actor.findUnique({ where: { email } });
     if (!actor) {
       return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
     }
 
-    // Compare password
     const isValid = await bcrypt.compare(password, actor.password);
-
     if (!isValid) {
       return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
     }
 
-    return NextResponse.json({ message: "Login successful", actor }, { status: 200 });
+    // Create a session cookie
+    const res = NextResponse.json({ message: "Login successful", actor }, { status: 200 });
+    res.cookies.set("session", actor.id, { httpOnly: true, path: "/" }); // 👈 cookie with actor.id
+    return res;
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
