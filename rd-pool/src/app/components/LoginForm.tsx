@@ -1,3 +1,10 @@
+/**
+ * Login form component for RD Pool.
+ * Handles user authentication by submitting credentials to the login API route.
+ * Displays feedback based on the login response.
+ *
+ * @returns {JSX.Element} The rendered login form.
+ */
 "use client";
 
 import { useState } from "react";

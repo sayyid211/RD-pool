@@ -1,4 +1,11 @@
 // src/app/page.tsx
+/**
+ * Home page component for RD Pool.
+ * Fetches and displays a list of research projects from the database.
+ * Shows login/signup options if the user is not authenticated.
+ *
+ * @returns {JSX.Element} The rendered homepage.
+ */
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";

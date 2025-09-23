@@ -1,3 +1,11 @@
+/**
+ * Project detail page component.
+ * Fetches and displays a single research project by ID, including owner information.
+ * Redirects to login if the user is not authenticated.
+ *
+ * @param params - The route parameters containing the project ID.
+ * @returns {JSX.Element} The rendered project detail page.
+ */
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";

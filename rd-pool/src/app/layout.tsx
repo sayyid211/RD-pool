@@ -1,3 +1,10 @@
+/**
+ * Layout component for the RD Pool application.
+ * Applies global fonts and styles, and wraps all pages with consistent HTML structure.
+ *
+ * @param children - The page content to render inside the layout.
+ * @returns {JSX.Element} The root layout structure.
+ */
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";

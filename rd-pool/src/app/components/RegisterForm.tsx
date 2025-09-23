@@ -1,3 +1,10 @@
+/**
+ * Registration form component for RD Pool.
+ * Handles user registration by submitting credentials to the register API route.
+ * Displays feedback based on the registration response.
+ *
+ * @returns {JSX.Element} The rendered registration form.
+ */
 "use client";
 
 import { useState } from "react";
