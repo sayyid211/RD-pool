@@ -1,32 +1,37 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
-const prisma = new PrismaClient();
+const SECRET = process.env.JWT_SECRET!;
 
 export async function POST(req: Request) {
-  try {
-    const { email, password } = await req.json();
+  const { email, password } = await req.json();
 
-    if (!email || !password) {
-      return NextResponse.json({ error: "Missing email or password" }, { status: 400 });
-    }
-
-    const actor = await prisma.actor.findUnique({ where: { email } });
-    if (!actor) {
-      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
-    }
-
-    const isValid = await bcrypt.compare(password, actor.password);
-    if (!isValid) {
-      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
-    }
-
-    // Create a session cookie
-    const res = NextResponse.json({ message: "Login successful", actor }, { status: 200 });
-    res.cookies.set("session", actor.id, { httpOnly: true, path: "/" }); // 👈 cookie with actor.id
-    return res;
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  const actor = await prisma.actor.findUnique({ where: { email } });
+  if (!actor) {
+    return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
   }
+
+  const valid = await bcrypt.compare(password, actor.password);
+  if (!valid) {
+    return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+  }
+
+  // Create JWT
+  const token = jwt.sign(
+    { id: actor.id, email: actor.email, name: actor.name },
+    SECRET,
+    { expiresIn: "7d" }
+  );
+
+  const res = NextResponse.json({ message: "Login successful" });
+  res.cookies.set("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+  });
+
+  return res;
 }

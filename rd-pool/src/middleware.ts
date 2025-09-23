@@ -1,28 +1,25 @@
-/**import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import jwt from "jsonwebtoken";
+
+const SECRET = process.env.JWT_SECRET!;
 
 export function middleware(req: NextRequest) {
-  const session = req.cookies.get("session")?.value;
+  const token = req.cookies.get("token")?.value;
 
-  // Protect routes under /posts/[id]
-  if (req.nextUrl.pathname.startsWith("/posts/")) {
-    if (!session) {
-      const loginUrl = new URL("/auth/login", req.url);
-      return NextResponse.redirect(loginUrl);
-    }
+  if (!token) {
+    return NextResponse.redirect(new URL("/auth/login", req.url));
   }
 
-  return NextResponse.next();
+  try {
+    jwt.verify(token, SECRET);
+    return NextResponse.next();
+  } catch {
+    return NextResponse.redirect(new URL("/auth/login", req.url));
+  }
 }
 
-// Define which routes should trigger the middleware
+// Apply middleware only to protected routes
 export const config = {
   matcher: ["/posts/:path*"],
-};
-*/
-
-export { default } from "next-auth/middleware";
-
-export const config = {
-  matcher: ["/posts/:path*"], // protect posts routes
 };
